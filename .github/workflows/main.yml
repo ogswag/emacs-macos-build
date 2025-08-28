@@ -1,0 +1,33 @@
+name: Build Emacs Plus
+
+on:
+  workflow_dispatch:
+    description: "Manually trigger Emacs build"
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - name: Set up Homebrew
+        run: |
+          export HOMEBREW_NO_INSTALL_FROM_API=1
+          brew update
+
+      - name: Tap Emacs Plus repository
+        run: brew tap d12frosted/emacs-plus
+
+      - name: Install Emacs Plus
+        run: brew install emacs-plus@31 --with-imagemagick --with-c9rgreen-sonoma-icon
+
+      - name: Package Emacs.app
+        run: |
+          EMACS_PATH=$(brew --prefix emacs-plus@31)/Emacs.app
+          echo "Zipping Emacs.app from $EMACS_PATH"
+          zip -r emacs-plus@31.zip "$EMACS_PATH"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: emacs-plus@31-macos
+          path: emacs-plus@31.zip
+          retention-days: 7
